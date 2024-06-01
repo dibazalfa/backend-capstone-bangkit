@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { initializeApp } = require('firebase/app');
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth');
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = require('firebase/auth');
 const bodyParser = require('body-parser');
 
 // Konfigurasi Firebase Client SDK
@@ -38,6 +38,16 @@ router.post('/login', async (req, res) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         res.status(200).json({ message: 'User logged in successfully', user: userCredential.user });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// API untuk logout
+router.post('/logout', async (req, res) => {
+    try {
+        await signOut(auth);
+        res.status(200).json({ message: 'User logged out successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
