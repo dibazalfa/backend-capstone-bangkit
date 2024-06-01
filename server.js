@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const moodRoutes = require('./routes/mood');
 
 // Inisialisasi Firebase Admin SDK
 const serviceAccount = require('./firebase-adminsdk.json');
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
+app.use('/moods', moodRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
