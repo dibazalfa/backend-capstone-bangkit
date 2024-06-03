@@ -5,12 +5,15 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const moodRoutes = require('./routes/mood');
 
-// Inisialisasi Firebase Admin SDK
+// Inisialisasi Firebase Admin SDK jika belum diinisialisasi
 const serviceAccount = require('./firebase-adminsdk.json');
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id,
+    });
+}
 
 const app = express();
 
@@ -19,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
-app.use('/moods', moodRoutes);
+app.use('/mood', moodRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
