@@ -37,11 +37,13 @@ router.post('/login', async (req, res) => {
 
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        res.status(200).json({ message: 'User logged in successfully', user: userCredential.user });
+        const idToken = await userCredential.user.getIdToken();
+        res.status(200).json({ message: 'User logged in successfully', token: idToken, user: userCredential.user });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
+
 
 // API untuk logout
 router.post('/logout', async (req, res) => {

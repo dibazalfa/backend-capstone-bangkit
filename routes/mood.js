@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const storeData = require('../services/storeData');
+const verifyToken = require('../services/authMiddleware');
+
+// Middleware verifyToken digunakan untuk semua endpoint mood
+router.use(verifyToken);
 
 // Fungsi untuk menambahkan mood baru
 const addMood = async (req, res, mood) => {
@@ -9,9 +13,10 @@ const addMood = async (req, res, mood) => {
         const moodData = {
             mood,
             createdAt,
+            userId: req.user.uid,
         };
 
-        await storeData(null, moodData); // Tidak ada userId
+        await storeData(req.user.uid, moodData);
 
         return res.status(201).json({
             status: 'success',

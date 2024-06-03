@@ -13,9 +13,8 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 async function storeData(userId, moodData) {
-    // Tambahkan logika untuk menentukan bagaimana menyimpan mood tanpa userId
-    const moodCollection = db.collection('moods'); // Koleksi baru untuk moods
-    await moodCollection.add(moodData); // Menambahkan moodData ke koleksi moods
+    const userMoodCollection = db.collection('users').doc(userId).collection('moods');
+    await userMoodCollection.add(moodData);
 }
 
 module.exports = storeData;
