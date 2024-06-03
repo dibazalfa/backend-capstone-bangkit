@@ -11,11 +11,14 @@
   "description": "",
   "dependencies": {
     "@hapi/hapi": "^21.3.9",
+    "@tensorflow/tfjs-node": "^4.14.0",
     "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "firebase": "^10.12.2",
     "firebase-admin": "^12.1.1",
-    "nanoid": "^5.0.7"
+    "nanoid": "^5.0.7",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.2"
