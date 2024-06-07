@@ -6,14 +6,14 @@ const bodyParser = require('body-parser');
 
 // Konfigurasi Firebase Client SDK
 const firebaseConfig = {
-    apiKey: "AIzaSyAN8uQYCaRbQ8Jxm8Ldx6VCINc1DWYB7Qk",
-    authDomain: "capstone-bangkit-424811.firebaseapp.com",
-    databaseURL: "https://capstone-bangkit-424811-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "capstone-bangkit-424811",
-    storageBucket: "capstone-bangkit-424811.appspot.com",
-    messagingSenderId: "486224351037",
-    appId: "1:486224351037:web:c6dd27063da04fddf3ff54"
-};
+    apiKey: "AIzaSyCo0VwyZyR2g-Z6qpibTopCe9qtKj2u4-8",
+    authDomain: "auth-capstone-424817.firebaseapp.com",
+    databaseURL: "https://auth-capstone-424817-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "auth-capstone-424817",
+    storageBucket: "auth-capstone-424817.appspot.com",
+    messagingSenderId: "685262484390",
+    appId: "1:685262484390:web:84295566e1e7da98509567"
+  };
 
 // Inisialisasi Firebase Client SDK
 const app = initializeApp(firebaseConfig);
