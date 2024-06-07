@@ -15,8 +15,20 @@ const db = admin.firestore();
 // Fungsi untuk memperbarui mood
 async function updateMood(userId, mood) {
     try {
+        // const hasMoodToday = await checkMoodToday(userId);
+
+        // if (hasMoodToday) {
+        //     return {
+        //         error: 'You have already added a mood today. You can only add one mood per day.'
+        //     };
+        // }
         const userMoodCollection = db.collection('users').doc(userId).collection('moods');
-        const snapshot = await userMoodCollection.orderBy('createdAt', 'desc').limit(1).get();
+        const today = new Date().toISOString().split('T')[0];
+        const snapshot = await userMoodCollection
+            .where('createdAt', '>=', `${today}T00:00:00.000Z`)
+            .where('createdAt', '<=', `${today}T23:59:59.999Z`)
+            .limit(1)
+            .get();
 
         if (!snapshot.empty) {
             const doc = snapshot.docs[0];
