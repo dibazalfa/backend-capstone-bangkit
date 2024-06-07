@@ -3,6 +3,7 @@ const router = express.Router();
 const storeData = require('../services/storeData');
 const updateMood = require('../services/updateMood');
 const verifyToken = require('../services/authMiddleware');
+const checkMoodToday = require('../services/checkMoodToday');
 
 // Middleware verifyToken digunakan untuk semua endpoint mood
 router.use(verifyToken);
@@ -10,6 +11,15 @@ router.use(verifyToken);
 // Fungsi untuk menambahkan mood baru
 const addMood = async (req, res, mood) => {
     try {
+        const hasMoodToday = await checkMoodToday(req.user.uid);
+
+        if (hasMoodToday) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'You have already added a mood today. You can only add one mood per day.'
+            });
+        }
+
         const createdAt = new Date().toISOString();
         const moodData = {
             mood,
@@ -52,12 +62,22 @@ router.post('/create/natural', async (req, res) => {
 router.put('/update/:mood', async (req, res) => {
     try {
         const mood = req.params.mood; // Dapatkan mood dari parameter rute
+        
+        // Memeriksa apakah mood yang diterima valid
+        if (!['happy', 'sad', 'natural'].includes(mood)) {
+            return res.status(400).json({
+                status: 'fail',
+                message: `Invalid mood '${mood}'. Mood must be 'happy', 'sad', or 'natural'.`
+            });
+        }
+
+        // Jika semua validasi berhasil, lanjutkan untuk memperbarui mood
         const updatedMoodData = await updateMood(req.user.uid, mood);
 
         return res.status(200).json({
             status: 'success',
             message: `Mood is successfully updated to '${mood}'`,
-            updatedMoodData
+            updatedMoodData: updatedMoodData
         });
     } catch (error) {
         console.error(`Error updating mood data:`, error);
