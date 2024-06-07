@@ -6,7 +6,7 @@ const admin = require('firebase-admin');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const moodRoutes = require('./routes/mood');
-const chatRoutes = require('./routes/chat'); // Tambahkan ini
+const { loadResources, router: chatRoutes } = require('./routes/chatbot'); // Mengimpor router dari chatbot.js
 
 // Inisialisasi Firebase Admin SDK jika belum diinisialisasi
 const serviceAccount = require('./firebase-adminsdk.json');
@@ -26,9 +26,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/mood', moodRoutes);
-app.use('/chat', chatRoutes); // Tambahkan ini
+app.use('/chat', chatRoutes); // Menggunakan router dari chatbot.js
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server berjalan pada http://localhost:${PORT}`);
+
+loadResources().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server berjalan pada http://localhost:${PORT}`);
+    });
+}).catch(err => {
+    console.error("Error loading resources:", err);
 });
