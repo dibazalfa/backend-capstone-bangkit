@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const storeData = require('../services/storeData');
-const updateMoodData = require('../services/updateMoodData'); 
+const updateMood = require('../services/updateMood');
 const verifyToken = require('../services/authMiddleware');
+const checkMoodToday = require('../services/checkMoodToday');
 
 // Middleware verifyToken digunakan untuk semua endpoint mood
 router.use(verifyToken);
@@ -10,11 +11,12 @@ router.use(verifyToken);
 // Fungsi untuk menambahkan mood baru
 const addMood = async (req, res, mood) => {
     try {
-        const userId = req.body.userId; // Ambil userId dari body request
-        if (!userId) {
+        const hasMoodToday = await checkMoodToday(req.user.uid);
+
+        if (hasMoodToday) {
             return res.status(400).json({
                 status: 'fail',
-                message: 'User ID is required'
+                message: 'You have already added a mood today. You can only add one mood per day.'
             });
         }
 
@@ -25,7 +27,7 @@ const addMood = async (req, res, mood) => {
             userId: req.user.uid,
         };
 
-        await storeData(userId, moodData); // Tidak ada userId
+        await storeData(req.user.uid, moodData);
 
         return res.status(201).json({
             status: 'success',
@@ -36,43 +38,7 @@ const addMood = async (req, res, mood) => {
         console.error(`Error adding mood '${mood}' data:`, error);
         return res.status(500).json({
             status: 'fail',
-            message: error.message // Menampilkan pesan error lebih rinci
-        });
-    }
-};
-
-// Fungsi untuk memperbarui mood
-const updateMood = async (req, res) => {
-    const { id } = req.params;
-    const { mood } = req.body;
-
-    if (!mood) {
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Mood is required'
-        });
-    }
-
-    try {
-        const updatedAt = new Date().toISOString();
-        const moodData = {
-            mood,
-            updatedAt,
-        };
-
-        await updateMoodData(id, moodData);
-
-        return res.status(200).json({
-            status: 'success',
-            message: `Mood '${mood}' is successfully updated`,
-            moodData
-        });
-    } catch (error) {
-        console.error(`Error updating mood data for id '${id}':`, error);
-        return res.status(500).json({
-            status: 'fail',
-            message: `Error updating mood data for id '${id}'`,
-            error: error.message
+            message: `Error adding mood '${mood}' data`
         });
     }
 };
@@ -92,9 +58,34 @@ router.post('/create/natural', async (req, res) => {
     await addMood(req, res, 'Natural');
 });
 
-// Endpoint untuk memperbarui mood berdasarkan ID
-router.put('/update/:id', async (req, res) => {
-    await updateMood(req, res);
+// Endpoint untuk memperbarui mood
+router.put('/update/:mood', async (req, res) => {
+    try {
+        const mood = req.params.mood; // Dapatkan mood dari parameter rute
+        
+        // Memeriksa apakah mood yang diterima valid
+        if (!['happy', 'sad', 'natural'].includes(mood)) {
+            return res.status(400).json({
+                status: 'fail',
+                message: `Invalid mood '${mood}'. Mood must be 'happy', 'sad', or 'natural'.`
+            });
+        }
+
+        // Jika semua validasi berhasil, lanjutkan untuk memperbarui mood
+        const updatedMoodData = await updateMood(req.user.uid, mood);
+
+        return res.status(200).json({
+            status: 'success',
+            message: `Mood is successfully updated to '${mood}'`,
+            updatedMoodData: updatedMoodData
+        });
+    } catch (error) {
+        console.error(`Error updating mood data:`, error);
+        return res.status(500).json({
+            status: 'fail',
+            message: `Error updating mood data`
+        });
+    }
 });
 
 module.exports = router;
