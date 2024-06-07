@@ -17,9 +17,4 @@ async function storeData(userId, moodData) {
     await userMoodCollection.add(moodData);
 }
 
-async function storeData(userId, chatData) {
-    const userChatCollection = db.collection('users').doc(userId).collection('chats');
-    await userChatCollection.add(chatData);
-}
-
 module.exports = storeData;

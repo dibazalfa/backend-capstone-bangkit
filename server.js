@@ -6,7 +6,6 @@ const admin = require('firebase-admin');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const moodRoutes = require('./routes/mood');
-const chatRoutes = require('./routes/chat'); // Tambahkan ini
 
 // Inisialisasi Firebase Admin SDK jika belum diinisialisasi
 const serviceAccount = require('./firebase-adminsdk.json');
@@ -26,7 +25,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/mood', moodRoutes);
-app.use('/chat', chatRoutes); // Tambahkan ini
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
