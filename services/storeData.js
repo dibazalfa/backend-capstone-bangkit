@@ -18,4 +18,7 @@ async function storeData(userId, moodData) {
     await userMoodCollection.add(moodData);
 }
 
-module.exports = storeData;
+module.exports = {
+    storeData,
+    db // Ekspor db
+};

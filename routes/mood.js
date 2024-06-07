@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const storeData = require('../services/storeData');
+const { db, storeData } = require('../services/storeData');
 const updateMood = require('../services/updateMood');
 const verifyToken = require('../services/authMiddleware');
 const checkMoodToday = require('../services/checkMoodToday');
+const getMoodToday = require('../services/getMoodToday');
 
+router.use(express.json());
 // Middleware verifyToken digunakan untuk semua endpoint mood
 router.use(verifyToken);
 
@@ -84,6 +86,42 @@ router.put('/update/:mood', async (req, res) => {
         return res.status(500).json({
             status: 'fail',
             message: `Error updating mood data`
+        });
+    }
+});
+
+// Endpoint untuk mendapatkan mood hari ini
+router.get('/today', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        console.log(`Today's date: ${today}`);
+        const userMoodCollection = db.collection('users').doc(req.user.uid).collection('moods');
+        const snapshot = await userMoodCollection
+            .where('createdAt', '>=', `${today}T00:00:00.000Z`)
+            .where('createdAt', '<=', `${today}T23:59:59.999Z`)
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            console.log('No mood entry found for today');
+            return res.status(404).json({
+                status: 'fail',
+                message: 'No mood entry found for today'
+            });
+        }
+
+        const moodData = snapshot.docs[0].data();
+        console.log('Mood data retrieved:', moodData);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Mood for today retrieved successfully',
+            moodData
+        });
+    } catch (error) {
+        console.error('Error getting mood for today:', error);
+        return res.status(500).json({
+            status: 'fail',
+            message: "Error getting today's mood"
         });
     }
 });
