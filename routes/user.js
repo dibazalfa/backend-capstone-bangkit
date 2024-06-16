@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
 
-// Middleware to parse request body
 router.use(express.json());
 
 // API untuk mendapatkan semua user

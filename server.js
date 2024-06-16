@@ -1,4 +1,4 @@
-require('dotenv').config(); // Tambahkan ini di baris pertama
+require('dotenv').config(); 
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -7,7 +7,6 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const moodRoutes = require('./routes/mood');
 
-// Inisialisasi Firebase Admin SDK jika belum diinisialisasi
 const serviceAccount = require('./firebase-adminsdk.json');
 
 if (!admin.apps.length) {

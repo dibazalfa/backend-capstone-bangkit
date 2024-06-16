@@ -7,10 +7,8 @@ const checkMoodToday = require('../services/checkMoodToday');
 const getMoodToday = require('../services/getMoodToday');
 
 router.use(express.json());
-// Middleware verifyToken digunakan untuk semua endpoint mood
 router.use(verifyToken);
 
-// Fungsi untuk menambahkan mood baru
 const addMood = async (req, res, mood) => {
     try {
         const hasMoodToday = await checkMoodToday(req.user.uid);
@@ -45,27 +43,22 @@ const addMood = async (req, res, mood) => {
     }
 };
 
-// Endpoint untuk menambah mood Happy
 router.post('/create/happy', async (req, res) => {
     await addMood(req, res, 'Happy');
 });
 
-// Endpoint untuk menambah mood Sad
 router.post('/create/sad', async (req, res) => {
     await addMood(req, res, 'Sad');
 });
 
-// Endpoint untuk menambah mood Natural
 router.post('/create/natural', async (req, res) => {
     await addMood(req, res, 'Natural');
 });
 
-// Endpoint untuk memperbarui mood
 router.put('/update/:mood', async (req, res) => {
     try {
-        const mood = req.params.mood; // Dapatkan mood dari parameter rute
+        const mood = req.params.mood; 
         
-        // Memeriksa apakah mood yang diterima valid
         if (!['happy', 'sad', 'natural'].includes(mood)) {
             return res.status(400).json({
                 status: 'fail',
@@ -73,7 +66,6 @@ router.put('/update/:mood', async (req, res) => {
             });
         }
 
-        // Jika semua validasi berhasil, lanjutkan untuk memperbarui mood
         const updatedMoodData = await updateMood(req.user.uid, mood);
 
         return res.status(200).json({
@@ -90,7 +82,6 @@ router.put('/update/:mood', async (req, res) => {
     }
 });
 
-// Endpoint untuk mendapatkan mood hari ini
 router.get('/today', async (req, res) => {
     try {
         const today = new Date().toISOString().split('T')[0];

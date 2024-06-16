@@ -25,9 +25,20 @@ router.post('/register', async (req, res) => {
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        res.status(201).json({ message: 'User registered successfully', user: userCredential.user });
+        const idToken = await userCredential.user.getIdToken();
+        const userId = userCredential.user.uid;
+
+        res.status(201).json({
+            error: false,
+            message: "success",
+            loginResult: {
+                userId: userId,
+                email: email,
+                token: idToken
+            }
+        });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: true, message: error.message });
     }
 });
 
@@ -38,12 +49,21 @@ router.post('/login', async (req, res) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const idToken = await userCredential.user.getIdToken();
-        res.status(200).json({ message: 'User logged in successfully', token: idToken, user: userCredential.user });
+        const userId = userCredential.user.uid;
+
+        res.status(200).json({
+            error: false,
+            message: "success",
+            loginResult: {
+                userId: userId,
+                email: email,
+                token: idToken
+            }
+        });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: true, message: error.message });
     }
 });
-
 
 // API untuk logout
 router.post('/logout', async (req, res) => {
