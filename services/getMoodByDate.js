@@ -10,13 +10,12 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-const getMoodToday = async (userId) => {
+const getMoodByDate = async (userId, date) => {
     try {
         const userMoodCollection = db.collection('users').doc(userId).collection('moods');
-        const today = new Date().toISOString().split('T')[0];
         const snapshot = await userMoodCollection
-            .where('createdAt', '>=', `${today}T00:00:00.000Z`)
-            .where('createdAt', '<=', `${today}T23:59:59.999Z`)
+            .where('createdAt', '>=', `${date}T00:00:00.000Z`)
+            .where('createdAt', '<=', `${date}T23:59:59.999Z`)
             .get();
 
         if (!snapshot.empty) {
@@ -26,9 +25,9 @@ const getMoodToday = async (userId) => {
             return null;
         }
     } catch (error) {
-        console.error("Error getting today's mood:", error);
-        throw new Error("Error getting today's mood");
+        console.error(`Error getting mood for date ${date}:`, error);
+        throw new Error(`Error getting mood for date ${date}`);
     }
 };
 
-module.exports = getMoodToday;
+module.exports = getMoodByDate;
