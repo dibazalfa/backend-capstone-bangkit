@@ -3,24 +3,24 @@ const router = express.Router();
 const { db, storeData } = require('../services/storeData');
 const updateMood = require('../services/updateMood');
 const verifyToken = require('../services/authMiddleware');
-const checkMoodToday = require('../services/checkMoodToday');
+const checkMoodForDate = require('../services/checkMoodForDate');
 const getMoodToday = require('../services/getMoodToday');
 
 router.use(express.json());
 router.use(verifyToken);
 
-const addMood = async (req, res, mood) => {
+const addMood = async (req, res, mood, date) => {
     try {
-        const hasMoodToday = await checkMoodToday(req.user.uid);
+        const hasMoodForDate = await checkMoodForDate(req.user.uid, date);
 
-        if (hasMoodToday) {
+        if (hasMoodForDate) {
             return res.status(400).json({
                 status: 'fail',
-                message: 'You have already added a mood today. You can only add one mood per day.'
+                message: `You have already added a mood for ${date}. You can only add one mood per day.`
             });
         }
 
-        const createdAt = new Date().toISOString();
+        const createdAt = new Date(`${date}T00:00:00.000Z`).toISOString();
         const moodData = {
             mood,
             createdAt,
@@ -31,53 +31,54 @@ const addMood = async (req, res, mood) => {
 
         return res.status(201).json({
             status: 'success',
-            message: `Mood '${mood}' is successfully added`,
+            message: `Mood '${mood}' for ${date} is successfully added`,
             moodData
         });
     } catch (error) {
-        console.error(`Error adding mood '${mood}' data:`, error);
+        console.error(`Error adding mood '${mood}' for ${date}:`, error);
         return res.status(500).json({
             status: 'fail',
-            message: `Error adding mood '${mood}' data`
+            message: `Error adding mood '${mood}' for ${date}`
         });
     }
 };
 
-router.post('/create/happy', async (req, res) => {
-    await addMood(req, res, 'Happy');
+router.post('/create/:date/:mood', async (req, res) => {
+    const { date, mood } = req.params;
+
+    if (!['happy', 'sad', 'natural'].includes(mood.toLowerCase())) {
+        return res.status(400).json({
+            status: 'fail',
+            message: `Invalid mood '${mood}'. Mood must be 'happy', 'sad', or 'natural'.`
+        });
+    }
+
+    await addMood(req, res, mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase(), date);
 });
 
-router.post('/create/sad', async (req, res) => {
-    await addMood(req, res, 'Sad');
-});
-
-router.post('/create/natural', async (req, res) => {
-    await addMood(req, res, 'Natural');
-});
-
-router.put('/update/:mood', async (req, res) => {
+router.put('/update/:date/:mood', async (req, res) => {
     try {
-        const mood = req.params.mood; 
-        
-        if (!['happy', 'sad', 'natural'].includes(mood)) {
+        const { date, mood } = req.params;
+
+        if (!['happy', 'sad', 'natural'].includes(mood.toLowerCase())) {
             return res.status(400).json({
                 status: 'fail',
                 message: `Invalid mood '${mood}'. Mood must be 'happy', 'sad', or 'natural'.`
             });
         }
 
-        const updatedMoodData = await updateMood(req.user.uid, mood);
+        const updatedMoodData = await updateMood(req.user.uid, mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase(), date);
 
         return res.status(200).json({
             status: 'success',
-            message: `Mood is successfully updated to '${mood}'`,
+            message: `Mood for ${date} is successfully updated to '${mood}'`,
             updatedMoodData: updatedMoodData
         });
     } catch (error) {
-        console.error(`Error updating mood data:`, error);
+        console.error(`Error updating mood for ${date}:`, error);
         return res.status(500).json({
             status: 'fail',
-            message: `Error updating mood data`
+            message: `Error updating mood for ${date}`
         });
     }
 });
@@ -85,7 +86,6 @@ router.put('/update/:mood', async (req, res) => {
 router.get('/today', async (req, res) => {
     try {
         const today = new Date().toISOString().split('T')[0];
-        console.log(`Today's date: ${today}`);
         const userMoodCollection = db.collection('users').doc(req.user.uid).collection('moods');
         const snapshot = await userMoodCollection
             .where('createdAt', '>=', `${today}T00:00:00.000Z`)
@@ -94,7 +94,6 @@ router.get('/today', async (req, res) => {
             .get();
 
         if (snapshot.empty) {
-            console.log('No mood entry found for today');
             return res.status(404).json({
                 status: 'fail',
                 message: 'No mood entry found for today'
@@ -102,7 +101,6 @@ router.get('/today', async (req, res) => {
         }
 
         const moodData = snapshot.docs[0].data();
-        console.log('Mood data retrieved:', moodData);
         return res.status(200).json({
             status: 'success',
             message: 'Mood for today retrieved successfully',
