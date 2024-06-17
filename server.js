@@ -25,7 +25,7 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/mood', moodRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server berjalan pada http://localhost:${PORT}`);
 });
