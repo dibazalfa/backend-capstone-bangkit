@@ -5,6 +5,8 @@ const multer = require('multer');
 const path = require('path');
 const serviceAccount = require('../firebase-adminsdk.json');
 const verifyToken = require('../services/authMiddleware');
+const { storePhoto } = require('../services/storeData');
+const getPhoto = require('../services/getPhoto');
 
 
 // Inisialisasi Firebase Admin SDK jika belum diinisialisasi
@@ -59,17 +61,40 @@ router.post('/upload', upload.single(), async (req, res) => {
 
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
 
+        const photoData = {
+            fileUrl: publicUrl,
+            userId: req.user.uid
+        };
+
+        await storePhoto(req.user.uid, photoData);
+
         return res.status(200).json({
             status: 'success',
             message: 'File uploaded successfully',
-            fileUrl: publicUrl,
-            userId: req.user.uid
+            photoData
         });
+
     } catch (error) {
         console.error('Error uploading file:', error);
         return res.status(500).json({
             status: 'fail',
             message: 'Error uploading file'
+        });
+    }
+});
+
+router.get('/get', async (req, res) => {
+    try {
+        const photos = await getPhoto(req.user.uid);
+        return res.status(200).json({
+            status: 'success',
+            photos
+        });
+    } catch (error) {
+        console.error('Error getting photos:', error);
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Error getting photos'
         });
     }
 });

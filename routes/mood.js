@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { storeData } = require('../services/storeData');
+const { storeMood } = require('../services/storeData');
 const updateMood = require('../services/updateMood');
 const verifyToken = require('../services/authMiddleware');
 const checkMoodForDate = require('../services/checkMoodForDate');
@@ -28,7 +28,7 @@ const addMood = async (req, res, mood, date) => {
             userId: req.user.uid,
         };
 
-        await storeData(req.user.uid, moodData);
+        await storeMood(req.user.uid, moodData);
 
         return res.status(201).json({
             status: 'success',

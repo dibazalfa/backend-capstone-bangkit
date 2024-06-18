@@ -13,12 +13,19 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 // Fungsi untuk menyimpan data mood baru
-async function storeData(userId, moodData) {
+async function storeMood(userId, moodData) {
     const userMoodCollection = db.collection('users').doc(userId).collection('moods');
     await userMoodCollection.add(moodData);
 }
 
+// Fungsi untuk menyimpan data foto baru
+async function storePhoto(userId, photoData) {
+    const userPhotoCollection = db.collection('users').doc(userId).collection('photos');
+    await userPhotoCollection.add(photoData);
+}
+
 module.exports = {
-    storeData,
+    storeMood,
+    storePhoto,
     db // Ekspor db
 };
