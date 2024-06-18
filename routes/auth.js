@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { initializeApp } = require('firebase/app');
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = require('firebase/auth');
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } = require('firebase/auth');
 const bodyParser = require('body-parser');
 
 // Konfigurasi Firebase Client SDK
@@ -19,14 +19,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// API untuk registrasi
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const idToken = await userCredential.user.getIdToken();
         const userId = userCredential.user.uid;
+
+        await updateProfile(userCredential.user, {
+            displayName: name
+        });
 
         res.status(201).json({
             error: false,
@@ -34,6 +37,7 @@ router.post('/register', async (req, res) => {
             loginResult: {
                 userId: userId,
                 email: email,
+                name: name,
                 token: idToken
             }
         });
@@ -42,7 +46,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// API untuk login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -50,6 +53,7 @@ router.post('/login', async (req, res) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const idToken = await userCredential.user.getIdToken();
         const userId = userCredential.user.uid;
+        const displayName = userCredential.user.displayName;
 
         res.status(200).json({
             error: false,
@@ -57,6 +61,7 @@ router.post('/login', async (req, res) => {
             loginResult: {
                 userId: userId,
                 email: email,
+                name: displayName,
                 token: idToken
             }
         });
@@ -65,7 +70,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// API untuk logout
 router.post('/logout', async (req, res) => {
     try {
         await signOut(auth);

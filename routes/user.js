@@ -4,7 +4,6 @@ const admin = require('firebase-admin');
 
 router.use(express.json());
 
-// API untuk mendapatkan semua user
 router.get('/all', async (req, res) => {
     try {
         const listUsersResult = await admin.auth().listUsers();
@@ -14,7 +13,6 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// API untuk mendapatkan user berdasarkan ID
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
