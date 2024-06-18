@@ -10,20 +10,26 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-const getMoodHistory = async (userId) => {
+const getMoodHistory = async () => {
     try {
-        const userMoodCollection = db.collection('users').doc(userId).collection('moods');
-        const snapshot = await userMoodCollection.orderBy('createdAt', 'asc').get();
-
-        if (snapshot.empty) {
-            return [];
-        }
-
         const moodHistory = [];
-        snapshot.forEach(doc => {
-            moodHistory.push({ id: doc.id, ...doc.data() });
-        });
 
+        // Ambil semua dokumen moods dari semua pengguna
+        const allUsers = await db.collection('users').get();
+        
+        // Untuk setiap pengguna, ambil koleksi moods
+        await Promise.all(allUsers.docs.map(async userDoc => {
+            const userId = userDoc.id;
+            const userMoodCollection = db.collection('users').doc(userId).collection('moods');
+            const snapshot = await userMoodCollection.orderBy('createdAt', 'asc').get();
+            
+            // Tambahkan semua entri mood ke moodHistory
+            snapshot.forEach(doc => {
+                moodHistory.push({ id: doc.id, ...doc.data() });
+            });
+        }));
+
+        console.log("Mood history retrieved:", moodHistory);
         return moodHistory;
     } catch (error) {
         console.error("Error getting mood history:", error);
