@@ -84,34 +84,28 @@ router.put('/update/:date/:mood', async (req, res) => {
     }
 });
 
-router.get('/today', async (req, res) => {
+router.get('/:date', async (req, res) => {
     try {
-        const today = new Date().toISOString().split('T')[0];
-        const userMoodCollection = db.collection('users').doc(req.user.uid).collection('moods');
-        const snapshot = await userMoodCollection
-            .where('createdAt', '>=', `${today}T00:00:00.000Z`)
-            .where('createdAt', '<=', `${today}T23:59:59.999Z`)
-            .limit(1)
-            .get();
+        const { date } = req.params;
+        const moodData = await getMoodByDate(req.user.uid, date);
 
-        if (snapshot.empty) {
+        if (!moodData) {
             return res.status(404).json({
                 status: 'fail',
-                message: 'No mood entry found for today'
+                message: `No mood entry found for date ${date}`
             });
         }
 
-        const moodData = snapshot.docs[0].data();
         return res.status(200).json({
             status: 'success',
-            message: 'Mood for today retrieved successfully',
+            message: `Mood for date ${date} retrieved successfully`,
             moodData
         });
     } catch (error) {
-        console.error('Error getting mood for today:', error);
+        console.error(`Error getting mood for date ${date}:`, error);
         return res.status(500).json({
             status: 'fail',
-            message: "Error getting today's mood"
+            message: `Error getting mood for date ${date}`
         });
     }
 });
