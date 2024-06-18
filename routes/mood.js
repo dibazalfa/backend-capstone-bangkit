@@ -110,34 +110,7 @@ router.get('/:date', async (req, res) => {
     }
 });
 
-// router.get('/all', async (req, res) => {
-//     try {
-//         console.log(`Fetching all mood history`);
-//         const moodHistory = await getMoodHistory();
-//         console.log(`Mood history retrieved:`, moodHistory);
-
-//         if (moodHistory.length === 0) {
-//             console.log(`No mood entries found for any user`);
-//             return res.status(404).json({
-//                 status: 'fail',
-//                 message: `No mood entries found for any user`
-//             });
-//         }
-
-//         return res.status(200).json({
-//             status: 'success',
-//             message: 'Mood history retrieved successfully',
-//             moodHistory
-//         });
-//     } catch (error) {
-//         console.error('Error getting mood history:', error);
-//         return res.status(500).json({
-//             status: 'fail',
-//             message: 'Error getting mood history'
-//         });
-//     }
-// });
-router.get('/all', async (req, res) => {
+router.get('/get/all', async (req, res) => {
     try {
         const moodHistory = await getMoodHistory(req.user.uid);
         return res.status(200).json({
